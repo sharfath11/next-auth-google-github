@@ -1,0 +1,105 @@
+"use client";
+import { useEffect, useState } from "react";
+import userCartSevice from "../../lib/models/hooks/userCartStore";
+import { redirect, useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+export default function CartDetiels() {
+  const router = useRouter();
+  const { items, itemsPrice, decrease, increase } = userCartSevice();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    console.log("hylo");
+  }, []);
+  // const {data:session}=useSession({
+  //   required:true,
+  //   onUnauthenticated(){
+  //     redirect("/api/auth/signin")
+  //   }
+  // })
+ 
+  if (!mounted) return <></>;
+  return (
+    <>
+      <h1 className="py-4 text-2xl">Soping Cart</h1>
+      {items.length === 0 ? (
+        <div>
+          Cart is empty. <Link href="/"> Go shopping</Link>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-4 md:gap-5">
+          <div className="overflow-x-auto md:col-span-3">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th></th>
+                </tr>
+              </thead>
+              {items.map((item) => (
+                <tr key={item.slug}>
+                  <td>
+                    <Link
+                      href={`/product/${item.slug}`}
+                      className="flex items-center"
+                    >
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={50}
+                        height={50}
+                      />
+                      <span className="px-2">{item.name}</span>
+                    </Link>
+                  </td>
+                  <td>
+                    <button
+                      className="btn"
+                      type="button"
+                      onClick={() => decrease(item)}
+                    >
+                      -
+                    </button>
+                    <span className="px-2">{item.qty}</span>
+                    <button
+                      className="btn"
+                      type="button"
+                      onClick={() => increase(item)}
+                    >
+                      +
+                    </button>
+                  </td>
+                  <td>INR: {item.price}</td>
+                </tr>
+              ))}
+            </table>
+          </div>
+          <div className="card bg-base-300">
+            <div className="card-body">
+              <ul>
+                <li>
+                  <div className="pb-3 text-xl">
+                    Subtotal ({items.reduce((a, c) => a + c.price, 0)}) INR:
+                    {itemsPrice}
+                  </div>
+                </li>
+                <li>
+                  <button onClick={()=>router.push('/shipping')} className="btn btn-primary w-full">
+                    Proceed to checkout
+                  </button>
+                  {/* <button onClick={ChecoutHandler} className="btn btn-primary w-full">
+                    Proceed to checkout
+                  </button> */}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
